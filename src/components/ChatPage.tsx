@@ -6,6 +6,7 @@ import { useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Sidebar from './Sidebar'
 import SidebarPanel from './SidebarPanel' // import at the top
+import ChatSidebar from '@/components/ChatSidebar'
 
 
 
@@ -91,11 +92,12 @@ export default function ChatPage() {
       else setMessages(data)
     }
 
-    fetchMessages()
+    fetchMessages();
 
     // Real-time subscription
     const channel = supabase
-      .channel(`chat-${selectedChat.id}`)
+    //   .channel(`chat-${selectedChat.id}`)
+    .channel(`realtime:messages:chat_id=eq.${selectedChat.id}`)
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'messages', filter: `chat_id=eq.${selectedChat.id}` },
@@ -128,18 +130,26 @@ export default function ChatPage() {
   }  
 
   return (
-    <div className="flex flex-col md:flex-row h-screen">
+    <div className="flex  md:flex-row h-screen flex-row">
       {/* Sidebar */}
 
       <SidebarPanel />
 
-      <Sidebar
+      <ChatSidebar
+      chats={chats}
+      selectedChatId={selectedChat?.id || null}
+      onSelectChat={(chatId) =>
+      setSelectedChat(chats.find((c) => c.id === chatId) || null)
+    }
+  />
+
+      {/* <Sidebar
         chats={chats}
         selectedChatId={selectedChat?.id || null}
         onSelectChat={(chatId) =>
           setSelectedChat(chats.find((c) => c.id === chatId) || null)
-        }
-      />
+        } */}
+      {/* /> */}
       {/* <button
             onClick={handleLogout}
             className="text-sm text-red-500 hover:underline"
